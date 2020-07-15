@@ -37,3 +37,18 @@ def describe_miscenter():
 
         assert not np.any(np.isnan(rho_miscs))
         assert rho_miscs.shape == (30, 8, 5)
+
+    def it_gives_the_right_answer_for_an_analytical_example(miscenter_model):
+        rs = np.logspace(-2, 2, 30)
+        def rho_func(x): return x**2
+
+        ul = miscenter_model.max_radius
+        ll = miscenter_model.min_radius
+        interval = ul - ll
+        def prob_dist_func(r): return np.ones_like(r)/interval
+
+        rho_miscs = miscenter_model.miscenter(rs, rho_func, prob_dist_func)
+
+        analytical_answer = 1/3 * (ll**2 + ul**2 + ul*ll + 3*rs**2)
+
+        assert np.allclose(rho_miscs, analytical_answer, rtol=1e-3)
