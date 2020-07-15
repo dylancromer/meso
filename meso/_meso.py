@@ -5,9 +5,8 @@ import meso.mathutils as mathutils
 
 @dataclass
 class Rho:
-    NUM_PHIS = 40
-
-    num_points: int = 200
+    num_offset_radii: int = 200
+    num_phis: int = 40
     min_radius: float = 1e-4
     max_radius: float = 10
 
@@ -21,11 +20,11 @@ class Rho:
         return np.logspace(
             np.log10(self.min_radius),
             np.log10(self.max_radius),
-            self.num_points,
+            self.num_offset_radii,
         )
 
     def _get_phi_samples(self):
-        return np.linspace(0, 2*np.pi, self.NUM_PHIS)
+        return np.linspace(0, 2*np.pi, self.num_phis)
 
     def _get_y_phi_integrand_and_differentials(self, radii, rho_func, prob_dist_func):
         ys = self._get_y_samples()
