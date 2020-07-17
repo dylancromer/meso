@@ -12,7 +12,8 @@ def describe_miscenter():
 
     def it_calculates_the_aggregate_miscentered_density(miscenter_model):
         rs = np.logspace(-2, 2, 30)
-        def rho_func(x): return 1/x**2
+        def rho_func(x):
+            return np.ones(x.shape+(1,))/x[..., None]**2
 
         def prob_dist_func(r):
             sigmas = np.array([0.4, 0.5])
@@ -27,7 +28,7 @@ def describe_miscenter():
     def it_can_handle_larger_shapes(miscenter_model):
         rs = np.logspace(-2, 2, 30)
         slopes = np.linspace(2, 3, 8)
-        amps = np.linspace(0.9, 1.1, 5)
+        amps = np.linspace(0.9, 1.1, 2)
         def rho_func(x):
             amps_ = mathutils.atleast_kd(amps, x.ndim+2, append_dims=False)
             slopes_ = mathutils.atleast_kd(slopes[:, None], x.ndim+2, append_dims=False)
@@ -42,7 +43,7 @@ def describe_miscenter():
         rho_miscs = miscenter_model.miscenter(rs, rho_func, prob_dist_func)
 
         assert not np.any(np.isnan(rho_miscs))
-        assert rho_miscs.shape == (30, 8, 5, 2)
+        assert rho_miscs.shape == (30, 8, 2)
 
     def it_gives_the_right_answer_for_an_analytical_example(miscenter_model):
         rs = np.logspace(-2, 2, 30)
