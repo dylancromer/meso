@@ -14,8 +14,11 @@ def describe_miscenter():
         rs = np.logspace(-2, 2, 30)
         def rho_func(x): return 1/x**2
 
-        sigma = 0.5
-        def prob_dist_func(r): return 1/np.sqrt(2*np.pi*sigma**2) * np.exp(-(r-0.2)**2/(2*sigma**2))
+        def prob_dist_func(r):
+            sigmas = np.array([0.4, 0.5])
+            sigmas = mathutils.atleast_kd(sigmas, r.ndim+1, append_dims=False)
+            r = mathutils.atleast_kd(r, r.ndim+1)
+            return 1/np.sqrt(2*np.pi*sigmas**2) * np.exp(-(r-0.2)**2/(2*sigmas**2))
 
         rho_miscs = miscenter_model.miscenter(rs, rho_func, prob_dist_func)
 
@@ -30,13 +33,16 @@ def describe_miscenter():
             slopes_ = mathutils.atleast_kd(slopes[:, None], x.ndim+2, append_dims=False)
             return amps_/x[..., None, None]**slopes_
 
-        sigma = 0.5
-        def prob_dist_func(r): return 1/np.sqrt(2*np.pi*sigma**2) * np.exp(-(r-0.2)**2/(2*sigma**2))
+        def prob_dist_func(r):
+            sigmas = np.array([0.4, 0.5])
+            sigmas = mathutils.atleast_kd(sigmas, r.ndim+1, append_dims=False)
+            r = mathutils.atleast_kd(r, r.ndim+1)
+            return 1/np.sqrt(2*np.pi*sigmas**2) * np.exp(-(r-0.2)**2/(2*sigmas**2))
 
         rho_miscs = miscenter_model.miscenter(rs, rho_func, prob_dist_func)
 
         assert not np.any(np.isnan(rho_miscs))
-        assert rho_miscs.shape == (30, 8, 5)
+        assert rho_miscs.shape == (30, 8, 5, 2)
 
     def it_gives_the_right_answer_for_an_analytical_example(miscenter_model):
         rs = np.logspace(-2, 2, 30)
@@ -45,9 +51,9 @@ def describe_miscenter():
         ul = miscenter_model.max_radius
         ll = miscenter_model.min_radius
         interval = ul - ll
-        def prob_dist_func(r): return np.ones_like(r)/interval
+        def prob_dist_func(r): return np.ones(r.shape+(1,))/interval
 
-        rho_miscs = miscenter_model.miscenter(rs, rho_func, prob_dist_func)
+        rho_miscs = miscenter_model.miscenter(rs, rho_func, prob_dist_func).squeeze()
 
         analytical_answer = 1/3 * (ll**2 + ul**2 + ul*ll + 3*rs**2)
 

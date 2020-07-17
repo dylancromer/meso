@@ -33,10 +33,15 @@ class Rho:
         rho_arg = self._rho_arg(radii, ys, phis)
         rhos = rho_func(rho_arg)
         probs = mathutils.atleast_kd(
-            prob_dist_func(ys)[None, :, None],
-            rhos.ndim,
+            prob_dist_func(ys)[None, ...],
+            rhos.ndim+1,
         )
-        return probs * rhos, np.gradient(ys), np.gradient(phis)
+        probs = np.moveaxis(
+            probs,
+            ys.ndim+1,
+            -1,
+        )
+        return probs * rhos[..., None], np.gradient(ys), np.gradient(phis)
 
     def miscenter(self, radii, rho_func, prob_dist_func):
         y_phi_integrand, dys, dphis = self._get_y_phi_integrand_and_differentials(radii, rho_func, prob_dist_func)
