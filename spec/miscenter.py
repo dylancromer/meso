@@ -59,3 +59,24 @@ def describe_miscenter():
         analytical_answer = 1/3 * (ll**2 + ul**2 + ul*ll + 3*rs**2)
 
         assert np.allclose(rho_miscs, analytical_answer, rtol=1e-3)
+
+    def it_can_handle_larger_radii_shapes(miscenter_model):
+        rs = np.logspace(-2, 2, 30)
+        rs = np.stack((rs, rs, rs))
+        slopes = np.linspace(2, 3, 8)
+        amps = np.linspace(0.9, 1.1, 2)
+        def rho_func(x):
+            amps_ = mathutils.atleast_kd(amps, x.ndim+2, append_dims=False)
+            slopes_ = mathutils.atleast_kd(slopes[:, None], x.ndim+2, append_dims=False)
+            return amps_/x[..., None, None]**slopes_
+
+        def prob_dist_func(r):
+            sigmas = np.array([0.4, 0.5])
+            sigmas = mathutils.atleast_kd(sigmas, r.ndim+1, append_dims=False)
+            r = mathutils.atleast_kd(r, r.ndim+1)
+            return 1/np.sqrt(2*np.pi*sigmas**2) * np.exp(-(r-0.2)**2/(2*sigmas**2))
+
+        rho_miscs = miscenter_model.miscenter(rs, rho_func, prob_dist_func)
+
+        assert not np.any(np.isnan(rho_miscs))
+        assert rho_miscs.shape == (3, 30, 8, 2)
