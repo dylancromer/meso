@@ -26,7 +26,7 @@ class Rho:
     def _get_phi_samples(self):
         return np.linspace(0, 2*np.pi, self.num_phis)
 
-    def _reshape_probs(self, probs, radii_ndim, rho_ndim):
+    def _reshape_probs(self, probs, rho_ndim):
         return np.moveaxis(
             mathutils.atleast_kd(probs, rho_ndim),
             1,
@@ -39,7 +39,7 @@ class Rho:
 
         rho_arg = self._rho_arg(radii, ys, phis)
         rhos = rho_func(rho_arg)
-        probs = self._reshape_probs(prob_dist_func(ys), radii.ndim, rhos.ndim)
+        probs = self._reshape_probs(prob_dist_func(ys), rhos.ndim)
         return probs * rhos, np.gradient(ys), np.gradient(phis)
 
     def miscenter(self, radii, rho_func, prob_dist_func):
