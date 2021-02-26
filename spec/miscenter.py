@@ -106,11 +106,9 @@ def describe_miscenter():
                 rs,
                 lambda r: rho_func(r, zs),
                 prob_dist_func,
-                radial_axis_to_broadcast=1,
-                density_axis=-1,
             )
 
             zs = meso.mathutils.atleast_kd(zs, rs.ndim, append_dims=False)
             analytical_answer = zs * 1/3 * (ll**2 + ul**2 + ul*ll + 3*rs**2)
 
-            assert np.allclose(rho_miscs, analytical_answer, rtol=1e-4)
+            assert np.allclose(rho_miscs, analytical_answer[..., None], rtol=1e-3)
