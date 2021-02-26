@@ -5,8 +5,8 @@ import meso.mathutils as mathutils
 
 @dataclass
 class Rho:
-    num_offset_radii: int = 200
-    num_phis: int = 40
+    num_offset_radii: int = 160
+    num_phis: int = 12
     min_radius: float = 1e-4
     max_radius: float = 10
 

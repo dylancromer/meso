@@ -80,3 +80,37 @@ def describe_miscenter():
 
         assert not np.any(np.isnan(rho_miscs))
         assert rho_miscs.shape == (3, 30, 8, 2)
+
+    def describe_context_redshift_dependent_radii():
+
+        @pytest.fixture
+        def miscenter_model():
+            return meso.Rho()
+
+        def it_can_allow_radii_that_are_functions_of_other_parameters(miscenter_model):
+            def rho_func(r, z):
+                z_ = meso.mathutils.atleast_kd(z, r.ndim, append_dims=False)
+                return (z_ * r**2)[..., None]
+
+            zs = np.linspace(1, 2, 3)
+            rs = np.array([
+                np.linspace(i, i+1, 10) for i in range(1, zs.size+1)
+            ]).T
+
+            ul = miscenter_model.max_radius
+            ll = miscenter_model.min_radius
+            interval = ul - ll
+            def prob_dist_func(r): return np.ones(r.shape+(1,))/interval
+
+            rho_miscs = miscenter_model.miscenter(
+                rs,
+                lambda r: rho_func(r, zs),
+                prob_dist_func,
+                radial_axis_to_broadcast=1,
+                density_axis=-1,
+            )
+
+            zs = meso.mathutils.atleast_kd(zs, rs.ndim, append_dims=False)
+            analytical_answer = zs * 1/3 * (ll**2 + ul**2 + ul*ll + 3*rs**2)
+
+            assert np.allclose(rho_miscs, analytical_answer, rtol=1e-4)
